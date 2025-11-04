@@ -1,0 +1,18 @@
+{
+  "language":"English",
+  "ollama":{
+    "api_key":"ollama",
+    "server_url":"http://localhost:11434/v1/chat/completions",
+    "model":"embeddinggemma"
+  },
+  "backup_server":{
+    "api_key":"",
+    "server_url":"",
+    "model":""
+  },
+  "server":{
+    "api_key":"your_api_key_here",
+    "server_url":"https://api.example.com/v1",
+    "model":"gpt-5"
+  }
+}
