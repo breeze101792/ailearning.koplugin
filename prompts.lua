@@ -42,6 +42,12 @@ function Prompts.generateQuestions(question, prompt, text, context, include_high
     return new_message_history
 end
 -- Module functions
+function Prompts.askText(text, context, question)
+    local question_content = question
+    local system_prompt = "You are a helpful reading researcher. Your task is to answer user questions about highlighted text and its context.\n"
+    return Prompts.generateQuestions(question_content, system_prompt, text, context, true)
+end
+
 function Prompts.syntaxText(text, context)
     local question_content = "Analyze the highlighted text, focusing on sentence structure, and explain it in " .. Prompts.target_language .. "."
     local system_prompt = "You are a helpful language analyst. Provide direct translations and explanations of difficult words, grammar, phrases, and sentence structures clearly and simply."
@@ -78,7 +84,7 @@ function Prompts.exampleText(text, context)
 end
 
 function Prompts.dictionaryText(text, context)
-    local question_content = "Provide a dictionary entry for '" .. text .. "', and explain it in " .. Prompts.target_language .. "."
+    local question_content = "Provide a dictionary entry for '" .. text .. "', explained in " .. Prompts.target_language .. ", and highlight its meaning in the current context."
     local system_prompt = "You are a helpful dictionary checker assistant. Provide a comprehensive dictionary entry for this word, without additional commentary. Include IPA, definitions, usages, and examples to help learners master this word. Also include other meanings, phrases, origin, and related parts if applicable."
     return Prompts.generateQuestions(question_content, system_prompt, text, context, false)
 end

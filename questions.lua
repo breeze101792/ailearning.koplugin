@@ -1,6 +1,7 @@
 
 local UIManager = require("ui/uimanager")
 local InfoMessage = require("ui/widget/infomessage")
+local InputDialog = require("ui/widget/inputdialog")
 local util = require("util")
 local _ = require("gettext")
 
@@ -61,6 +62,14 @@ function Questions.showInfoDialog(text)
 end
 
 -- Questions
+function Questions.originText(selected_text, context)
+    text = "Word origin"
+    Questions.showInfoDialog()
+    UIManager:scheduleIn(0.1, function()
+        question_message = Prompts.originText(selected_text, context )
+        Questions.generateResponse("Provide the word origin to user.", question_message, selected_text, text)
+    end)
+end
 function Questions.dictionaryText(selected_text, context)
     text = "Dictionary"
     Questions.showInfoDialog()
@@ -164,10 +173,40 @@ function Questions.menu(selected_text, context)
                 hold_callback = function() end
             },
             {
-                text = "Cancel",
+                text = "Ask",
                 callback = function()
-                    if menu then UIManager:close(menu) end
-                end
+                    input_dialog = InputDialog:new {
+                        title = _("Ask Question."),
+                        input = "",
+                        input_type = "text",
+                        description = _("Enter your question about the highlighted words."),
+                        buttons = {
+                            {
+                                {
+                                    text = _("Cancel"),
+                                    callback = function()
+                                        UIManager:close(input_dialog)
+                                    end,
+                                },
+                                {
+                                    text = _("Ok"),
+                                    is_enter_default = true,
+                                    callback = function()
+                                        local user_question = input_dialog:getInputText()
+                                        Questions.showInfoDialog()
+                                        UIManager:scheduleIn(0.1, function()
+                                            question_message = Prompts.askText(selected_text, context, user_question )
+                                            Questions.generateResponse(user_question, question_message, selected_text, _("User Question"))
+                                        end)
+                                        UIManager:close(input_dialog)
+                                    end,
+                                },
+                            },
+                        },
+                    }
+                    UIManager:show(input_dialog)
+                end,
+                hold_callback = function() end
             }
         },
     }
