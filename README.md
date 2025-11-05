@@ -3,9 +3,9 @@
 AILearning is a KOPLUGIN for Kindle devices that integrates AI-powered learning assistance directly into your reading experience. It allows you to interact with highlighted text and dictionary lookups using various AI models, including custom servers and Ollama.
 
 ## Screenshot
-![Menu: Main menu of the AILearning plugin](resources/menu.png)
-![Translation: AI-powered translation of highlighted text](resources/translation.png)
-![Word Origin: AI-powered explanation of word etymology](resources/word_origin.png)
+| Main Menu | Translation | Word Origin |
+| :-------: | :---------: | :---------: |
+| ![Menu: Main menu of the AILearning plugin](resources/menu.png) | ![Translation: AI-powered translation of highlighted text](resources/translation.png) | ![Word Origin: AI-powered explanation of word etymology](resources/word_origin.png) |
 
 ## Features
 
