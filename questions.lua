@@ -14,6 +14,7 @@ local Config = require("config")
 local Questions = {}
 
 function Questions.init()
+    -- TODO, remove this after we get lang directly from config.
     Prompts.target_language = Config.config.language
 end
 

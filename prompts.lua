@@ -1,6 +1,7 @@
 
 local Prompts = {}
 
+-- TODO, remove this after we get lang directly from config.
 Prompts.target_language = 'English'
 
 function Prompts.getInstruction()

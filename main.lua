@@ -22,6 +22,7 @@ local DialogViewer = require("dialogviewer")
 -- local Dialog = require("dialogs")
 -- local QuestionMenu = require("questionmenu")
 local Questions = require("questions")
+local Prompts = require("prompts")
 
 local AILearning = WidgetContainer:extend{
     name = "hello",
@@ -56,9 +57,11 @@ local function showAbout()
     "Thank you for using this plugin. Enjoy!\n" ..
     "\n" ..
     "[Config]\n" ..
-    "The configuration file can be found at: /mnt/us/koreader/data/ailearning_config.json\n" ..
+    "The configuration file can be found at: \n" ..
+    "/mnt/us/koreader/data/ailearning_config.json\n" ..
     "If the file is not found, you can create it via the 'Configs Save' menu option.\n" ..
     "Before using AI features, please set up your server_url, api_key, and model.\n" ..
+    "\n" ..
     "Note: If you want to use Ollama, make sure the firewall allows port 11434.\n"..
     "If you fail to connect, you could try the following command to allow from others devices.\n"..
     "OLLAMA_HOST=0.0.0.0:11434 ollama serve \n" ..
@@ -119,7 +122,12 @@ end
 local function getSubMenuConfig()
     config_sub_menu_table = {
         {
+            text = _("# Config Actions"),
+            keep_menu_open = true,
+        },
+        {
             text = _("Configs Load"),
+            keep_menu_open = true,
             callback = function()
                 Config.save()
                 local info_diag = InfoMessage:new{
@@ -131,6 +139,7 @@ local function getSubMenuConfig()
         },
         {
             text = _("Configs Save"),
+            keep_menu_open = true,
             callback = function()
                 Config.save()
                 local info_diag = InfoMessage:new{
@@ -142,16 +151,18 @@ local function getSubMenuConfig()
             separator = true,
         },
         {
-            text = _("Config Parameters"),
+            text = _("# Config Parameters"),
+            keep_menu_open = true,
         },
         {
             text = _("Language"),
+            keep_menu_open = true,
             callback = function()
                 input_dialog = InputDialog:new {
                     title = _("Enter your Language.."),
-                    input = "",
+                    input = _(Config.config.language),
                     input_type = "text",
-                    description = _("Enter Language you want AI to speak. Current: " .. Config.config.language),
+                    description = _("Enter Language you want AI to speak. "),
                     buttons = {
                         {
                             {
@@ -166,6 +177,7 @@ local function getSubMenuConfig()
                                 callback = function()
                                     local input_lang = input_dialog:getInputText()
                                     Config.config.language = input_lang
+                                    Prompts.target_language = input_lang
                                     Config.save()
                                     UIManager:close(input_dialog)
                                 end,
@@ -178,13 +190,18 @@ local function getSubMenuConfig()
             separator = true,
         },
         {
-            text = _("Ollama IP"),
+            text = _("# server configs"),
+            keep_menu_open = true,
+        },
+        {
+            text = _("Ollama url"),
+            keep_menu_open = true,
             callback = function()
                 input_dialog = InputDialog:new {
-                    title = _("Please input ollama server ip"),
-                    input = "",
+                    title = _("Please input ollama server url"),
+                    input = _(Config.config.ollama.server_url),
                     input_type = "text",
-                    description = _("Enter your server ip:port."),
+                    description = _("Enter your server url, you could just enter\n ex. ip/ip:port/full url.\n"),
                     buttons = {
                         {
                             {
@@ -197,12 +214,17 @@ local function getSubMenuConfig()
                                 text = _("Ok"),
                                 is_enter_default = true,
                                 callback = function()
-                                    local ollama_ip = input_dialog:getInputText()
-                                    local server_address = ollama_ip
-                                    if not string.find(ollama_ip, ":") then
-                                        server_address = ollama_ip .. ":11434"
+                                    local input_text = input_dialog:getInputText()
+                                    local server_address = input_text
+                                    if not (string.find(input_text, "http://") or string.find(input_text, "https://")) then
+                                        if not string.find(input_text, ":") then
+                                            server_address = input_text .. ":11434"
+                                        end
+                                        Config.config.ollama.server_url = "http://" .. server_address .. "/v1/chat/completions"
+                                    else
+                                        -- Config.config.ollama.server_url = input_text .. "/v1/chat/completions"
+                                        Config.config.ollama.server_url = input_text
                                     end
-                                    Config.config.ollama.server_url = "http://" .. server_address .. "/v1/chat/completions"
                                     Config.save()
                                     UIManager:close(input_dialog)
                                 end,
@@ -215,10 +237,11 @@ local function getSubMenuConfig()
         },
         {
             text = _("Ollama Model"),
+            keep_menu_open = true,
             callback = function()
                 input_dialog = InputDialog:new {
                     title = _("Please input ollama model"),
-                    input = "",
+                    input = _(Config.config.ollama.model),
                     input_type = "text",
                     description = _("Enter ollama local model."),
                     buttons = {
@@ -251,10 +274,11 @@ end
 local function getSubMenuDebug()
     debug_sub_menu_table = {
         {
-            text = _("Show Configs"),
+            text = _("Dump Configs"),
+            keep_menu_open = true,
             callback = function()
                 local dialogviewer = DialogViewer:new{
-                    title = _("Configs."),
+                    title = _("Dump Configs."),
                     text = Config.dump()
                 }
                 UIManager:show(dialogviewer)
@@ -262,12 +286,7 @@ local function getSubMenuDebug()
             separator = true,
         },
         {
-            text_func = function()
-                return _("Enabled")
-            end,
-        },
-        {
-            text = _("Open Dialog"),
+            text = _("Test Dialog"),
             callback = function()
                 local dialogviewer = DialogViewer:new{
                     title = _("AI Dialog."),
@@ -291,7 +310,25 @@ function AILearning:addToMainMenu(menu_items)
         sorting_hint = "tools",
         sub_item_table = {
             {
-                text = _("Toggle servers"),
+                text = _("Configs"),
+                keep_menu_open = true,
+                sub_item_table = config_sub_menu_table,
+            },
+            {
+                text = _("Debug"),
+                keep_menu_open = true,
+                sub_item_table = debug_sub_menu_table,
+            },
+            {
+                text = _("About"),
+                keep_menu_open = true,
+                callback = function()
+                    showAbout()
+                end,
+                separator = true,
+            },
+            {
+                text = _("# Toggle servers"),
                 keep_menu_open = true,
             },
             {
@@ -323,21 +360,6 @@ function AILearning:addToMainMenu(menu_items)
                         Config.config.ollama.enable = true
                     end
                     -- Config.save()
-                end,
-                separator = true,
-            },
-            {
-                text = _("Configs"),
-                sub_item_table = config_sub_menu_table,
-            },
-            {
-                text = _("Debug"),
-                sub_item_table = debug_sub_menu_table,
-            },
-            {
-                text = _("About"),
-                callback = function()
-                    showAbout()
                 end,
             },
         }
