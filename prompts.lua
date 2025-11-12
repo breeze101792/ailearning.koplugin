@@ -45,7 +45,7 @@ end
 -- Module functions
 function Prompts.askText(text, context, question)
     local question_content = question
-    local system_prompt = "You are a helpful reading researcher. Your task is to answer user questions about highlighted text and its context.\n"
+    local system_prompt = "You are a helpful reading researcher. Your task is to answer user questions, leveraging the highlighted text and its context. If no highlighted text or context is provided, simply answer the user's question."
     return Prompts.generateQuestions(question_content, system_prompt, text, context, true)
 end
 

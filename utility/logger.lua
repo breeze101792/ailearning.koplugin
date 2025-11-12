@@ -1,16 +1,16 @@
 local Config = require("utility/config")
 
 local Logger = {
-    -- Default to INFO (0: NONE, 1: CRITICAL, 2: ERROR, 3: WARNING, 4: INFO, 6: DEBUG, 7: TRACE, 8: MAX)
+    -- Default to INFO (0: NONE, 1: CRITICAL, 2: ERROR, 3: WARNING, 4: INFO, 5: DEBUG, 6: TRACE, 7: MAX)
     LogLevel = {
         NONE = 0,
         CRITICAL = 1,
         ERROR    = 2,
         WARNING  = 3,
         INFO     = 4,
-        DEBUG    = 6,
-        TRACE    = 7,
-        MAX      = 8, -- Used as an upper bound to show all logging
+        DEBUG    = 5,
+        TRACE    = 6,
+        MAX      = 7, -- Used as an upper bound to show all logging
     }
 }
 

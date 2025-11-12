@@ -81,7 +81,7 @@ function OpenAI.request(message_history, server_info)
     if response and response.choices and response.choices[1] and response.choices[1].message and response.choices[1].message.content then
         -- NOTE. for some small model, we remove ** for better viewing.
         stripped_response = string.gsub(response.choices[1].message.content, "%*%*", "")
-        return true, code, stripped_response
+        return true, code, stripped_response .. "\n\nAnswered by: " .. model
     else
         return false, code, "Error: Unexpected response format from Server API.\n Response: " .. table.concat(rspBody)
     end

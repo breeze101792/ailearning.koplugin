@@ -74,6 +74,17 @@ local function showAbout()
     UIManager:show(dialogviewer)
 end
 
+local function showAIMenu_GeneralAsk(ui)
+    local title, author =
+    ui.document:getProps().title or _("Unknown Title"),
+    ui.document:getProps().authors or _("Unknown Author")
+
+    context = "Book: " .. title .. ", Author: " .. author
+    selected_text = ""
+
+    Questions.menu(selected_text, context)
+end
+
 local function showAILearningMenu(ui, selected_text)
     context = get_full_context(ui, selected_text) or _("")
 
@@ -101,6 +112,7 @@ function AILearning:init()
             enabled = Device:hasClipboard(),
             callback = function()
                 NetworkMgr:runWhenOnline(function()
+                    UIManager:close(self.ui)
                     showAILearningMenu(self.ui, _reader_highlight_instance.selected_text.text)
                 end)
             end,
@@ -108,7 +120,7 @@ function AILearning:init()
     end)
     self.ui.highlight:addToHighlightDialog("ailearning_explain", function(_reader_highlight_instance)
         return {
-            text = _("AITranslate"),
+            text = _("AI Translate"),
             enabled = Device:hasClipboard(),
             callback = function()
                 NetworkMgr:runWhenOnline(function()
@@ -451,7 +463,7 @@ local function getSubMenuDebug()
                     title = _("Set debug level."),
                     input = _(Config.config.log_level),
                     input_type = "number",
-                    description = _("0: NONE, 1: CRITICAL, 2: ERROR, 3: WARNING, 4: INFO, 6: DEBUG, 7: TRACE, 8: MAX"),
+                    description = _("0: NONE, 1: CRITICAL, 2: ERROR, 3: WARNING, 4: INFO, 5: DEBUG, 6: TRACE, 7: MAX"),
                     buttons = {
                         {
                             {
@@ -465,7 +477,7 @@ local function getSubMenuDebug()
                                 is_enter_default = true,
                                 callback = function()
                                     local log_level = input_dialog:getInputText()
-                                    Config.config.log_level = log_level
+                                    Config.config.log_level = tonumber(log_level)
                                     -- Config.save()
                                     UIManager:close(input_dialog)
                                 end,
@@ -510,6 +522,14 @@ function AILearning:addToMainMenu(menu_items)
                 text = _("Debug"),
                 keep_menu_open = true,
                 sub_item_table = debug_sub_menu_table,
+            },
+            {
+                text = _("AI Menu"),
+                keep_menu_open = true,
+                callback = function()
+                    showAIMenu_GeneralAsk(self.ui)
+                end,
+                separator = true,
             },
             {
                 text = _("About"),
