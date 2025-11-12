@@ -6,11 +6,14 @@ local ltn12 = require("ltn12")
 local json = require("json")
 local socket = require("socket") -- Add socket for sleep function
 
+local Logger = require("utility/logger")
 -- Local Library
-local Config = require("config")
+local Config = require("utility/config")
 
 local OpenAI = {
-    retry_limit = 3,
+    -- since we have more then one server here, disable retry for now.
+    -- Note. this retry is original for fixing google request issue.
+    retry_limit = 0,
     retry_delay = 1,
 }
 function OpenAI.header(api_key)
@@ -38,6 +41,8 @@ function OpenAI.request(message_history, server_info)
     local reqHeaders = OpenAI.header(api_key)
     local reqBody = OpenAI.body(model, message_history)
 
+    Logger.debug(string.format('LLM Request server: "%s", model: "%s".', server_url, model))
+
     local rspBody = {}
     local res, code, rspHeaders
 
@@ -62,7 +67,7 @@ function OpenAI.request(message_history, server_info)
             break -- Success, exit loop
         elseif attempts <= OpenAI.retry_limit and code == 503 then
             -- only retry when 503.
-            print(string.format("Error querying Server API: %s. Retrying in %d seconds (attempt %d/%d)...", code, OpenAI.retry_delay, attempts, OpenAI.retry_limit + 1))
+            logger.warning(string.format("Error querying Server API: %s. Retrying in %d seconds (attempt %d/%d)...", code, OpenAI.retry_delay, attempts, OpenAI.retry_limit + 1))
             socket.sleep(OpenAI.retry_delay)
         else
             -- we return the words to user, not just crash it.
@@ -74,7 +79,9 @@ function OpenAI.request(message_history, server_info)
     -- FIXME, ensure null check before return
     local response = json.decode(table.concat(rspBody))
     if response and response.choices and response.choices[1] and response.choices[1].message and response.choices[1].message.content then
-        return true, code, response.choices[1].message.content
+        -- NOTE. for some small model, we remove ** for better viewing.
+        stripped_response = string.gsub(response.choices[1].message.content, "%*%*", "")
+        return true, code, stripped_response
     else
         return false, code, "Error: Unexpected response format from Server API.\n Response: " .. table.concat(rspBody)
     end
@@ -86,18 +93,18 @@ function OpenAI.query(message_history)
     local resp = "No enable server found."
 
     -- try with main/backup server.
-    if Config.config.server.enable then
+    if Config.config.main.enable then
         local server_info = {
-            server_url = Config.config.server.server_url or "https://api.openai.com/v1/chat/completions",
-            model = Config.config.server.model or "gpt-4o-mini",
-            api_key = Config.config.server.api_key or "",
+            server_url = Config.config.main.server_url or "https://api.openai.com/v1/chat/completions",
+            model = Config.config.main.model or "gpt-4o-mini",
+            api_key = Config.config.main.api_key or "",
         }
         res, code, resp = OpenAI.request(message_history, server_info)
         if res then
             return resp
         end
     else
-        print('Main server disabled.')
+        Logger.debug('Main server disabled.')
     end
 
     -- try with ollama server.
@@ -112,7 +119,26 @@ function OpenAI.query(message_history)
             return resp
         end
     else
-        print('Ollama server disabled.')
+        Logger.debug('Ollama server disabled.')
+    end
+
+    -- Loop through dynamically added servers
+    if Config.config.servers then
+        for server_name, server_config in pairs(Config.config.servers) do
+            if server_config.enable then
+                local server_info = {
+                    server_url = server_config.server_url,
+                    model = server_config.model,
+                    api_key = server_config.api_key,
+                }
+                res, code, resp = OpenAI.request(message_history, server_info)
+                if res then
+                    return resp
+                end
+            else
+                Logger.debug(string.format('Dynamic server "%s" disabled.', server_name))
+            end
+        end
     end
 
     return resp

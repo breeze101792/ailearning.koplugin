@@ -17,7 +17,7 @@ local WidgetContainer = require("ui/widget/container/widgetcontainer")
 local _ = require("gettext")
 
 -- local modules
-local Config = require("config")
+local Config = require("utility/config")
 local DialogViewer = require("dialogviewer")
 -- local Dialog = require("dialogs")
 -- local QuestionMenu = require("questionmenu")
@@ -119,7 +119,231 @@ function AILearning:init()
     end)
 end
 
+local function getSubMenuConfig_configServers()
+    server_config_menu = {
+        {
+            text = _("# Config servers"),
+            keep_menu_open = true,
+            separator = true,
+        },
+        {
+            text = _("Main server url"),
+            keep_menu_open = true,
+            callback = function()
+                input_dialog = InputDialog:new {
+                    title = _("Please input main server url"),
+                    input = _(Config.config.main.server_url),
+                    input_type = "text",
+                    description = _("Enter your server url, you could just enter\n ex. ip/ip:port/full url.\n"),
+                    buttons = {
+                        {
+                            {
+                                text = _("Cancel"),
+                                callback = function()
+                                    UIManager:close(input_dialog)
+                                end,
+                            },
+                            {
+                                text = _("Ok"),
+                                is_enter_default = true,
+                                callback = function()
+                                    local input_text = input_dialog:getInputText()
+                                    local server_address = input_text
+                                    if not (string.find(input_text, "http://") or string.find(input_text, "https://")) then
+                                        Config.config.main.server_url = "https://" .. server_address .. "/v1/chat/completions"
+                                    else
+                                        -- Config.config.main.server_url = input_text .. "/v1/chat/completions"
+                                        Config.config.main.server_url = input_text
+                                    end
+                                    -- Config.save()
+                                    UIManager:close(input_dialog)
+                                end,
+                            },
+                        },
+                    },
+                }
+                UIManager:show(input_dialog)
+            end,
+        },
+        {
+            text = _("Main Server Model"),
+            keep_menu_open = true,
+            callback = function()
+                input_dialog = InputDialog:new {
+                    title = _("Please input main server model"),
+                    input = _(Config.config.main.model),
+                    input_type = "text",
+                    description = _("Enter main server model."),
+                    buttons = {
+                        {
+                            {
+                                text = _("Cancel"),
+                                callback = function()
+                                    UIManager:close(input_dialog)
+                                end,
+                            },
+                            {
+                                text = _("Ok"),
+                                is_enter_default = true,
+                                callback = function()
+                                    local ollama_model = input_dialog:getInputText()
+                                    Config.config.main.model = ollama_model
+                                    -- Config.save()
+                                    UIManager:close(input_dialog)
+                                end,
+                            },
+                        },
+                    },
+                }
+                UIManager:show(input_dialog)
+            end,
+            separator = true,
+        },
+        {
+            text = _("Ollama url"),
+            keep_menu_open = true,
+            callback = function()
+                input_dialog = InputDialog:new {
+                    title = _("Please input ollama server url"),
+                    input = _(Config.config.ollama.server_url),
+                    input_type = "text",
+                    description = _("Enter your server url, you could just enter\n ex. ip/ip:port/full url.\n"),
+                    buttons = {
+                        {
+                            {
+                                text = _("Cancel"),
+                                callback = function()
+                                    UIManager:close(input_dialog)
+                                end,
+                            },
+                            {
+                                text = _("Ok"),
+                                is_enter_default = true,
+                                callback = function()
+                                    local input_text = input_dialog:getInputText()
+                                    local server_address = input_text
+                                    if not (string.find(input_text, "http://") or string.find(input_text, "https://")) then
+                                        if not string.find(input_text, ":") then
+                                            server_address = input_text .. ":11434"
+                                        end
+                                        Config.config.ollama.server_url = "http://" .. server_address .. "/v1/chat/completions"
+                                    else
+                                        -- Config.config.ollama.server_url = input_text .. "/v1/chat/completions"
+                                        Config.config.ollama.server_url = input_text
+                                    end
+                                    -- Config.save()
+                                    UIManager:close(input_dialog)
+                                end,
+                            },
+                        },
+                    },
+                }
+                UIManager:show(input_dialog)
+            end,
+        },
+        {
+            text = _("Ollama Model"),
+            keep_menu_open = true,
+            callback = function()
+                input_dialog = InputDialog:new {
+                    title = _("Please input ollama model"),
+                    input = _(Config.config.ollama.model),
+                    input_type = "text",
+                    description = _("Enter ollama local model."),
+                    buttons = {
+                        {
+                            {
+                                text = _("Cancel"),
+                                callback = function()
+                                    UIManager:close(input_dialog)
+                                end,
+                            },
+                            {
+                                text = _("Ok"),
+                                is_enter_default = true,
+                                callback = function()
+                                    local ollama_model = input_dialog:getInputText()
+                                    Config.config.ollama.model = ollama_model
+                                    -- Config.save()
+                                    UIManager:close(input_dialog)
+                                end,
+                            },
+                        },
+                    },
+                }
+                UIManager:show(input_dialog)
+            end,
+            separator = true,
+        }
+    }
+
+    return server_config_menu
+end
+local function getSubMenuConfig_toggleServers()
+    server_toogle_menu = {
+        {
+            text = _("# Toogle servers"),
+            keep_menu_open = true,
+        },
+        {
+            text = _("Enable main server"),
+            keep_menu_open = true,
+            checked_func = function()
+                return Config.config.main.enable
+            end,
+            callback = function(touchmenu_instance)
+                if Config.config.main.enable then
+                    Config.config.main.enable = false
+                else
+                    Config.config.main.enable = true
+                end
+                Config.save()
+            end,
+        },
+        {
+            text = _("Enable ollama"),
+            keep_menu_open = true,
+            checked_func = function()
+                return Config.config.ollama.enable
+            end,
+            callback = function(touchmenu_instance)
+                if Config.config.ollama.enable then
+                    Config.config.ollama.enable = false
+                else
+                    Config.config.ollama.enable = true
+                end
+                Config.save()
+            end,
+        },
+    }
+
+    -- Dynamically add user-defined servers from Config.config.servers
+    if Config.config.servers then
+        for server_name, server_config in pairs(Config.config.servers) do
+            table.insert(server_toogle_menu, {
+                text = _("Enable ") .. server_name .. _(" server"),
+                keep_menu_open = true,
+                checked_func = function()
+                    if server_config.enable == nil then
+                        server_config.enable = false
+                        Config.save()
+                    end
+                    return server_config.enable
+                end,
+                callback = function(touchmenu_instance)
+                    server_config.enable = not server_config.enable
+                    Config.save()
+                end,
+            })
+        end
+    end
+
+    return server_toogle_menu
+end
 local function getSubMenuConfig()
+    toggle_server_menu = getSubMenuConfig_toggleServers()
+    toggle_config_menu = getSubMenuConfig_configServers()
+
     config_sub_menu_table = {
         {
             text = _("# Config Actions"),
@@ -129,7 +353,7 @@ local function getSubMenuConfig()
             text = _("Configs Load"),
             keep_menu_open = true,
             callback = function()
-                Config.save()
+                Config.load()
                 local info_diag = InfoMessage:new{
                     text = _("Config loaded."),
                     timeout = 1,
@@ -178,7 +402,7 @@ local function getSubMenuConfig()
                                     local input_lang = input_dialog:getInputText()
                                     Config.config.language = input_lang
                                     Prompts.target_language = input_lang
-                                    Config.save()
+                                    -- Config.save()
                                     UIManager:close(input_dialog)
                                 end,
                             },
@@ -194,80 +418,14 @@ local function getSubMenuConfig()
             keep_menu_open = true,
         },
         {
-            text = _("Ollama url"),
-            keep_menu_open = true,
-            callback = function()
-                input_dialog = InputDialog:new {
-                    title = _("Please input ollama server url"),
-                    input = _(Config.config.ollama.server_url),
-                    input_type = "text",
-                    description = _("Enter your server url, you could just enter\n ex. ip/ip:port/full url.\n"),
-                    buttons = {
-                        {
-                            {
-                                text = _("Cancel"),
-                                callback = function()
-                                    UIManager:close(input_dialog)
-                                end,
-                            },
-                            {
-                                text = _("Ok"),
-                                is_enter_default = true,
-                                callback = function()
-                                    local input_text = input_dialog:getInputText()
-                                    local server_address = input_text
-                                    if not (string.find(input_text, "http://") or string.find(input_text, "https://")) then
-                                        if not string.find(input_text, ":") then
-                                            server_address = input_text .. ":11434"
-                                        end
-                                        Config.config.ollama.server_url = "http://" .. server_address .. "/v1/chat/completions"
-                                    else
-                                        -- Config.config.ollama.server_url = input_text .. "/v1/chat/completions"
-                                        Config.config.ollama.server_url = input_text
-                                    end
-                                    Config.save()
-                                    UIManager:close(input_dialog)
-                                end,
-                            },
-                        },
-                    },
-                }
-                UIManager:show(input_dialog)
-            end,
+            text = _("Toggle Servers"),
+            sub_item_table = toggle_server_menu
         },
         {
-            text = _("Ollama Model"),
-            keep_menu_open = true,
-            callback = function()
-                input_dialog = InputDialog:new {
-                    title = _("Please input ollama model"),
-                    input = _(Config.config.ollama.model),
-                    input_type = "text",
-                    description = _("Enter ollama local model."),
-                    buttons = {
-                        {
-                            {
-                                text = _("Cancel"),
-                                callback = function()
-                                    UIManager:close(input_dialog)
-                                end,
-                            },
-                            {
-                                text = _("Ok"),
-                                is_enter_default = true,
-                                callback = function()
-                                    local ollama_model = input_dialog:getInputText()
-                                    Config.config.ollama.model = ollama_model
-                                    Config.save()
-                                    UIManager:close(input_dialog)
-                                end,
-                            },
-                        },
-                    },
-                }
-                UIManager:show(input_dialog)
-            end,
+            text = _("Config Servers"),
+            sub_item_table = toggle_config_menu
         },
+
     }
     return config_sub_menu_table
 end
@@ -282,6 +440,40 @@ local function getSubMenuDebug()
                     text = Config.dump()
                 }
                 UIManager:show(dialogviewer)
+            end,
+            separator = true,
+        },
+        {
+            text = _("Debug Level"),
+            keep_menu_open = true,
+            callback = function()
+                input_dialog = InputDialog:new {
+                    title = _("Set debug level."),
+                    input = _(Config.config.log_level),
+                    input_type = "number",
+                    description = _("0: NONE, 1: CRITICAL, 2: ERROR, 3: WARNING, 4: INFO, 6: DEBUG, 7: TRACE, 8: MAX"),
+                    buttons = {
+                        {
+                            {
+                                text = _("Cancel"),
+                                callback = function()
+                                    UIManager:close(input_dialog)
+                                end,
+                            },
+                            {
+                                text = _("Ok"),
+                                is_enter_default = true,
+                                callback = function()
+                                    local log_level = input_dialog:getInputText()
+                                    Config.config.log_level = log_level
+                                    -- Config.save()
+                                    UIManager:close(input_dialog)
+                                end,
+                            },
+                        },
+                    },
+                }
+                UIManager:show(input_dialog)
             end,
             separator = true,
         },
@@ -335,16 +527,15 @@ function AILearning:addToMainMenu(menu_items)
                 text = _("Enable main server"),
                 keep_menu_open = true,
                 checked_func = function()
-                    return Config.config.server.enable
+                    return Config.config.main.enable
                 end,
                 callback = function(touchmenu_instance)
-                    if Config.config.server.enable then
-                        Config.config.server.enable = false
+                    if Config.config.main.enable then
+                        Config.config.main.enable = false
                     else
-                        Config.config.server.enable = true
+                        Config.config.main.enable = true
                     end
-                    -- ignore for now, so we need to do it every boot up.
-                    -- Config.save()
+                    Config.save()
                 end,
             },
             {
@@ -359,7 +550,7 @@ function AILearning:addToMainMenu(menu_items)
                     else
                         Config.config.ollama.enable = true
                     end
-                    -- Config.save()
+                    Config.save()
                 end,
             },
         }
@@ -390,7 +581,6 @@ function AILearning:onDictButtonsReady(dict_popup, buttons)
                 NetworkMgr:runWhenOnline(function()
                     showAILearningQuestion(self.ui, dict_popup.lookupword, Questions.originText)
                 end)
-                dict_popup:onClose()
             end
         },
         {
@@ -400,7 +590,6 @@ function AILearning:onDictButtonsReady(dict_popup, buttons)
                 NetworkMgr:runWhenOnline(function()
                     showAILearningQuestion(self.ui, dict_popup.lookupword, Questions.dictionaryText)
                 end)
-                dict_popup:onClose()
             end
         }
     }

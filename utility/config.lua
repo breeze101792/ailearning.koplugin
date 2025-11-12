@@ -7,24 +7,33 @@ local default_config_path = './data/ailearning.json'
 local Config = {}
 -- Note. you could use qwen3 for offline model.
 Config.config = {
-    server = {
+    main = {
         enable = true,
         api_key = "your_api_key_here",
         model = "gpt-5",
         server_url = "https://api.example.com/v1"
     },
-    backup_server = {
-        api_key = "",
-        model = "",
-        server_url = ""
-    },
     ollama = {
-        enable = true,
+        enable = false,
         api_key = "ollama",
         model = "",
         server_url = ""
     },
+    servers = {
+        -- Example of a user-added server
+        -- You can add more servers here, e.g., server1, server2, etc.
+        -- Each server should have 'enable', 'api_key', 'model', and 'server_url' fields.
+        --[[
+        example = {
+            enable = false, -- Set to true to enable this backup server
+            api_key = "",
+            model = "",
+            server_url = ""
+        },
+        --]]
+    },
     language = "English",
+    log_level = 3, -- (0: NONE, 1: CRITICAL, 2: ERROR, 3: WARNING, 4: INFO, 6: DEBUG, 7: TRACE, 8: MAX)
 }
 
 -- Helper function to deeply merge two tables

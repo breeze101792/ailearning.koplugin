@@ -9,7 +9,7 @@ local Prompts = require("prompts")
 local DialogViewer = require("dialogviewer")
 local Menu = require("menu")
 local OpenAI = require("openai")
-local Config = require("config")
+local Config = require("utility/config")
 
 local Questions = {}
 
