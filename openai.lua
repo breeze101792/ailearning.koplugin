@@ -64,28 +64,26 @@ function OpenAI.request(message_history, server_info)
         }
 
         if code == 200 then
-            break -- Success, exit loop
-        elseif attempts <= OpenAI.retry_limit and code == 503 then
-            -- only retry when 503.
-            logger.warning(string.format("Error querying Server API: %s. Retrying in %d seconds (attempt %d/%d)...", code, OpenAI.retry_delay, attempts, OpenAI.retry_limit + 1))
-            socket.sleep(OpenAI.retry_delay)
+            local response = json.decode(table.concat(rspBody))
+            if response and response.choices and response.choices[1] and response.choices[1].message and response.choices[1].message.content then
+                -- NOTE. for some small model, we remove ** for better viewing.
+                stripped_response = string.gsub(response.choices[1].message.content, "%*%*", "")
+                return true, code, stripped_response .. "\n\nPower by: " .. model
+            end
+
+            -- break -- Success, exit loop
+        elseif attempts <= OpenAI.retry_limit and code == 500 and code == 503 then
+            -- only retry when 5xx, if needed.
+            logger.debug(string.format("Error querying Server API: %s. Retrying in %d seconds (attempt %d/%d)...", code, OpenAI.retry_delay, attempts, OpenAI.retry_limit + 1))
         else
-            -- we return the words to user, not just crash it.
-            -- error("Error querying Server API after multiple retries: " .. code)
-            return false, code, string.format("Error querying Server API: %s. Retrying attempt %d/%d.\n Respone: %s", code, attempts, OpenAI.retry_limit + 1, table.concat(rspBody))
+            -- other error happened, just return it.
+            break
         end
+        socket.sleep(OpenAI.retry_delay)
     end
 
-    -- FIXME, ensure null check before return
-    local response = json.decode(table.concat(rspBody))
-    if response and response.choices and response.choices[1] and response.choices[1].message and response.choices[1].message.content then
-        -- NOTE. for some small model, we remove ** for better viewing.
-        stripped_response = string.gsub(response.choices[1].message.content, "%*%*", "")
-        return true, code, stripped_response .. "\n\nAnswered by: " .. model
-    else
-        return false, code, "Error: Unexpected response format from Server API.\n Response: " .. table.concat(rspBody)
-    end
-
+    logger.debug("Query failed. Status code: " .. code .. "\nResponse: " .. table.concat(rspBody))
+    return false, code, "Query failed. Status code: " .. code .. "\nResponse: " .. table.concat(rspBody)
 end
 function OpenAI.query(message_history)
 

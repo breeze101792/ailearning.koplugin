@@ -6,7 +6,7 @@ Prompts.target_language = 'English'
 
 function Prompts.getInstruction()
     local loc_general_instruction = "Note:\n" ..
-    "1. Do not use bold text; use plain text only. Use spaces for indentation.\n" ..
+    "1. Do not use markdown syntax; use plain text only. Use spaces for indentation.\n" ..
     "2. Do not reveal spoilers.\n" ..
     "3. Translations and explanations must be provided in " .. Prompts.target_language .. "." ..
     ""

@@ -147,7 +147,7 @@ function Questions.menu(selected_text, context)
                 hold_callback = function() end
             },
             {
-                text = "Origin",
+                text = "Word Origin",
                 callback = function()
                     Questions.showInfoDialog()
                     UIManager:scheduleIn(0.1, function()
@@ -162,12 +162,16 @@ function Questions.menu(selected_text, context)
             {
                 text = "Debug MSG",
                 callback = function()
-                    question_message = Prompts.dictionaryText(selected_text, context )
+                    question_message = Prompts.askText(selected_text, context, "[Debug] Dump query")
                     question_text = Questions.MsgToText(question_message)
 
                     local dialogviewer = DialogViewer:new{
                         title = _("AI Dialog."),
-                        text = "Context: " .. context .. "\nSelected Text: " .. selected_text .. "\nQuestion: " .. question_text,
+                        text = "Context: " .. context ..
+                        "\nSelected Text: " .. selected_text ..
+                        "\n" ..
+                        "\nQuery details shows below:\n" ..
+                        question_text,
                     }
                     UIManager:show(dialogviewer)
                 end,

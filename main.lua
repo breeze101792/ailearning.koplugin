@@ -56,15 +56,25 @@ local function showAbout()
     "Version 0.1\n" ..
     "Thank you for using this plugin. Enjoy!\n" ..
     "\n" ..
-    "[Config]\n" ..
-    "The configuration file can be found at: \n" ..
-    "/mnt/us/koreader/data/ailearning_config.json\n" ..
-    "If the file is not found, you can create it via the 'Configs Save' menu option.\n" ..
-    "Before using AI features, please set up your server_url, api_key, and model.\n" ..
+    "  [Configuration]\n" ..
+    "    Menu:\n" ..
+    "      Changes made in the menu will not be saved until you click 'Configs Save'.\n" ..
+    "      Please test your settings before saving.\n" ..
     "\n" ..
-    "Note: If you want to use Ollama, make sure the firewall allows port 11434.\n"..
-    "If you fail to connect, you could try the following command to allow from others devices.\n"..
-    "OLLAMA_HOST=0.0.0.0:11434 ollama serve \n" ..
+    "    File:\n" ..
+    "      The configuration file can be found at:\n" ..
+    "      /mnt/us/koreader/data/ailearning.json\n" ..
+    "      If the file is not found, you can create it using the 'Configs Save' menu option.\n" ..
+    "      Before using AI features, please set up your server_url, api_key, and model.\n" ..
+    "\n" ..
+    "  Note: \n" ..
+    "    If you want to use Ollama, ensure your firewall allows port 11434.\n" ..
+    "    If you fail to connect, you can try the following command to allow connections from other devices:\n" ..
+    "    OLLAMA_HOST=0.0.0.0:11434 ollama serve \n" ..
+    "\n" ..
+    "\n" ..
+    "For the latest updates, visit: \n" ..
+    "https://github.com/breeze101792/ailearning.koplugin \n" ..
     ""
 
     local dialogviewer = DialogViewer:new{
@@ -106,25 +116,26 @@ function AILearning:init()
     -- register functions
     self.ui.menu:registerToMainMenu(self)
 
-    self.ui.highlight:addToHighlightDialog("ailearning_menu", function(_reader_highlight_instance)
+    self.ui.highlight:addToHighlightDialog("ailearning_menu", function(highlight_dialog)
         return {
             text = _("AI Menu"),
             enabled = Device:hasClipboard(),
             callback = function()
                 NetworkMgr:runWhenOnline(function()
-                    UIManager:close(self.ui)
-                    showAILearningMenu(self.ui, _reader_highlight_instance.selected_text.text)
+                    selected_text = highlight_dialog.selected_text.text
+                    showAILearningMenu(self.ui, selected_text)
                 end)
+                highlight_dialog:onClose(true)
             end,
         }
     end)
-    self.ui.highlight:addToHighlightDialog("ailearning_explain", function(_reader_highlight_instance)
+    self.ui.highlight:addToHighlightDialog("ailearning_explain", function(highlight_dialog)
         return {
             text = _("AI Translate"),
             enabled = Device:hasClipboard(),
             callback = function()
                 NetworkMgr:runWhenOnline(function()
-                    showAILearningQuestion(self.ui, _reader_highlight_instance.selected_text.text, Questions.translateText)
+                    showAILearningQuestion(self.ui, highlight_dialog.selected_text.text, Questions.translateText)
                 end)
             end,
         }
@@ -134,19 +145,19 @@ end
 local function getSubMenuConfig_configServers()
     server_config_menu = {
         {
-            text = _("# Config servers"),
+            text = _("# Config Servers"),
             keep_menu_open = true,
             separator = true,
         },
         {
-            text = _("Main server url"),
+            text = _("Main Server URL"),
             keep_menu_open = true,
             callback = function()
                 input_dialog = InputDialog:new {
-                    title = _("Please input main server url"),
+                    title = _("Please input main server URL"),
                     input = _(Config.config.main.server_url),
                     input_type = "text",
-                    description = _("Enter your server url, you could just enter\n ex. ip/ip:port/full url.\n"),
+                    description = _("Enter your server URL, you could just enter\n ex. ip/ip:port/full URL.\n"),
                     buttons = {
                         {
                             {
@@ -212,14 +223,14 @@ local function getSubMenuConfig_configServers()
             separator = true,
         },
         {
-            text = _("Ollama url"),
+            text = _("Ollama URL"),
             keep_menu_open = true,
             callback = function()
                 input_dialog = InputDialog:new {
-                    title = _("Please input ollama server url"),
+                    title = _("Please input ollama server URL"),
                     input = _(Config.config.ollama.server_url),
                     input_type = "text",
-                    description = _("Enter your server url, you could just enter\n ex. ip/ip:port/full url.\n"),
+                    description = _("Enter your server URL, you could just enter\n ex. ip/ip:port/full URL.\n"),
                     buttons = {
                         {
                             {
@@ -294,7 +305,7 @@ end
 local function getSubMenuConfig_toggleServers()
     server_toogle_menu = {
         {
-            text = _("# Toogle servers"),
+            text = _("# Toogle Servers"),
             keep_menu_open = true,
         },
         {
@@ -309,7 +320,7 @@ local function getSubMenuConfig_toggleServers()
                 else
                     Config.config.main.enable = true
                 end
-                Config.save()
+                -- Config.save()
             end,
         },
         {
@@ -324,7 +335,7 @@ local function getSubMenuConfig_toggleServers()
                 else
                     Config.config.ollama.enable = true
                 end
-                Config.save()
+                -- Config.save()
             end,
         },
     }
@@ -338,13 +349,13 @@ local function getSubMenuConfig_toggleServers()
                 checked_func = function()
                     if server_config.enable == nil then
                         server_config.enable = false
-                        Config.save()
+                        -- Config.save()
                     end
                     return server_config.enable
                 end,
                 callback = function(touchmenu_instance)
                     server_config.enable = not server_config.enable
-                    Config.save()
+                    -- Config.save()
                 end,
             })
         end
@@ -358,11 +369,11 @@ local function getSubMenuConfig()
 
     config_sub_menu_table = {
         {
-            text = _("# Config Actions"),
+            text = _("# Configs (Please test before saving)"),
             keep_menu_open = true,
         },
         {
-            text = _("Configs Load"),
+            text = _("Configs Reload"),
             keep_menu_open = true,
             callback = function()
                 Config.load()
@@ -426,7 +437,7 @@ local function getSubMenuConfig()
             separator = true,
         },
         {
-            text = _("# server configs"),
+            text = _("# Server Configs"),
             keep_menu_open = true,
         },
         {
@@ -453,7 +464,6 @@ local function getSubMenuDebug()
                 }
                 UIManager:show(dialogviewer)
             end,
-            separator = true,
         },
         {
             text = _("Debug Level"),
@@ -487,16 +497,12 @@ local function getSubMenuDebug()
                 }
                 UIManager:show(input_dialog)
             end,
-            separator = true,
         },
         {
-            text = _("Test Dialog"),
+            text = _("Show AI Menu"),
+            keep_menu_open = true,
             callback = function()
-                local dialogviewer = DialogViewer:new{
-                    title = _("AI Dialog."),
-                    text = _("I'll need to be longer than this example to scroll."),
-                }
-                UIManager:show(dialogviewer)
+                showAIMenu_GeneralAsk(self.ui)
             end,
         },
     }
@@ -509,7 +515,7 @@ function AILearning:addToMainMenu(menu_items)
 
     menu_items.ai_learning_menu = {
         -- its name is "calibre", but all our top menu items are uppercase.
-        text = _("AILearning"),
+        text = _("AI Learning"),
         -- sorting_hint = "more_tools",
         sorting_hint = "tools",
         sub_item_table = {
@@ -524,14 +530,6 @@ function AILearning:addToMainMenu(menu_items)
                 sub_item_table = debug_sub_menu_table,
             },
             {
-                text = _("AI Menu"),
-                keep_menu_open = true,
-                callback = function()
-                    showAIMenu_GeneralAsk(self.ui)
-                end,
-                separator = true,
-            },
-            {
                 text = _("About"),
                 keep_menu_open = true,
                 callback = function()
@@ -540,7 +538,7 @@ function AILearning:addToMainMenu(menu_items)
                 separator = true,
             },
             {
-                text = _("# Toggle servers"),
+                text = _("# Toggle servers temporally"),
                 keep_menu_open = true,
             },
             {
@@ -555,7 +553,7 @@ function AILearning:addToMainMenu(menu_items)
                     else
                         Config.config.main.enable = true
                     end
-                    Config.save()
+                    -- Config.save()
                 end,
             },
             {
@@ -570,7 +568,7 @@ function AILearning:addToMainMenu(menu_items)
                     else
                         Config.config.ollama.enable = true
                     end
-                    Config.save()
+                    -- Config.save()
                 end,
             },
         }
