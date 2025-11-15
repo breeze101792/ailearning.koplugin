@@ -67,14 +67,14 @@ function OpenAI.request(message_history, server_info)
             local response = json.decode(table.concat(rspBody))
             if response and response.choices and response.choices[1] and response.choices[1].message and response.choices[1].message.content then
                 -- NOTE. for some small model, we remove ** for better viewing.
-                stripped_response = string.gsub(response.choices[1].message.content, "%*%*", "")
+                local stripped_response = string.gsub(response.choices[1].message.content, "%*%*", "")
                 return true, code, stripped_response .. "\n\nPower by: " .. model
             end
 
             -- break -- Success, exit loop
-        elseif attempts <= OpenAI.retry_limit and code == 500 and code == 503 then
+        elseif attempts <= OpenAI.retry_limit and (code == 500 or code == 503) then
             -- only retry when 5xx, if needed.
-            logger.debug(string.format("Error querying Server API: %s. Retrying in %d seconds (attempt %d/%d)...", code, OpenAI.retry_delay, attempts, OpenAI.retry_limit + 1))
+            Logger.debug(string.format("Error querying Server API: %s. Retrying in %d seconds (attempt %d/%d)...", code, OpenAI.retry_delay, attempts, OpenAI.retry_limit + 1))
         else
             -- other error happened, just return it.
             break
@@ -82,7 +82,7 @@ function OpenAI.request(message_history, server_info)
         socket.sleep(OpenAI.retry_delay)
     end
 
-    logger.debug("Query failed. Status code: " .. code .. "\nResponse: " .. table.concat(rspBody))
+    Logger.debug("Query failed. Status code: " .. code .. "\nResponse: " .. table.concat(rspBody))
     return false, code, "Query failed. Status code: " .. code .. "\nResponse: " .. table.concat(rspBody)
 end
 function OpenAI.query(message_history)

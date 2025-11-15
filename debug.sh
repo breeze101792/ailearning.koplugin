@@ -1,3 +1,9 @@
+
+push_android() {
+    adb push *.lua utility /storage/emulated/0/koreader/plugins/ailearning.koplugin/
+    # adb push utility/*.lua /storage/emulated/0/koreader/plugins/ailearning.koplugin/utility
+}
+
 push() {
     local files_to_copy
     # Otherwise, default to all .lua files
@@ -27,14 +33,25 @@ debug()
     ssh kindle tail -n 50 ${crash_file} 
 }
 main(){
-    if [ "$1" = "push" ]; then
+    if [ "$1" = "help" ]; then
+        echo "Usage: $0 [command]"
+        echo ""
+        echo "Commands:"
+        echo "  help      Display this help message."
+        echo "  anpush    Push plugin files to Android device via adb."
+        echo "  kpush     Push plugin files to Kindle device via scp."
+        echo "  kdebug    Display the last 50 lines of the Kindle crash log."
+        echo "  kkey <file> Push a key file to Kindle device's data directory."
+    elif [ "$1" = "anpush" ]; then
+        push_android
+    elif [ "$1" = "kpush" ]; then
         push
-    elif [ "$1" = "debug" ]; then
+    elif [ "$1" = "kdebug" ]; then
         debug
-    elif [ "$1" = "key" ]; then
+    elif [ "$1" = "kkey" ]; then
         push_key $2
     else
-        echo "Usage: $0 [push|debug]"
+        echo "Usage: $0 [help|anpush|kpush|kdebug|kkey <file>]"
         exit 1
     fi
 }

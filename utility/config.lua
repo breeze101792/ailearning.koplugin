@@ -1,17 +1,37 @@
 
 -- Save this as write_config.lua
 local json = require("dkjson")  -- or use cjson if available
+local Util = require("util")
 -- copy config under koreader/data/
 local default_config_path = './data/ailearning.json'
+
+-- check if andnroid config exit or not.
+local android_path = '/sdcard/koreader/'
+if Util.pathExists(android_path) then
+    default_config_path = android_path .. '/data/ailearning.json'
+end
+
+-- we check for current path for debuging.
+local ok, lfs = pcall(require, "lfs")
+local current_path = ""
+if ok and lfs then
+    current_path = lfs.currentdir()
+else
+    -- Handle case where lfs is not available, e.g., set current_path to a default or empty string
+    -- print("[ailearning] Warning: lfs module not available. Current directory might not be accurate.")
+    current_path = "./" -- Default to current directory if lfs is not found
+end
 
 local Config = {}
 -- Note. you could use qwen3 for offline model.
 Config.config = {
+    debug_config_path = default_config_path,
+    debug_current_path = current_path,
     main = {
-        enable = true,
-        api_key = "your_api_key_here",
-        model = "gpt-5",
-        server_url = "https://api.example.com/v1"
+        enable = false,
+        api_key = "",
+        model = "",
+        server_url = ""
     },
     ollama = {
         enable = false,
@@ -33,6 +53,7 @@ Config.config = {
         --]]
     },
     language = "English",
+    context_window = 32,
     log_level = 3, -- (0: NONE, 1: CRITICAL, 2: ERROR, 3: WARNING, 4: INFO, 6: DEBUG, 7: TRACE, 8: MAX)
 }
 

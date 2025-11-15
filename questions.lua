@@ -167,10 +167,13 @@ function Questions.menu(selected_text, context)
 
                     local dialogviewer = DialogViewer:new{
                         title = _("AI Dialog."),
-                        text = "Context: " .. context ..
-                        "\nSelected Text: " .. selected_text ..
+                        text = "# Info: \n" .. 
+                        "======================================\n" ..
+                        "Selected Text: " .. selected_text .. "\n" ..
+                        context .. "\n" ..
                         "\n" ..
-                        "\nQuery details shows below:\n" ..
+                        "\n# Query details shows below:\n" ..
+                        "======================================\n" ..
                         question_text,
                     }
                     UIManager:show(dialogviewer)

@@ -29,28 +29,6 @@ local AILearning = WidgetContainer:extend{
     is_doc_only = true,
 }
 
-local function get_full_context(ui, selected_text)
-    local title, author =
-    ui.document:getProps().title or _("Unknown Title"),
-    ui.document:getProps().authors or _("Unknown Author")
-
-    local prev_context, next_context
-    if ui.highlight then
-        prev_context, next_context = ui.highlight:getSelectedWordContext(32)
-    end
-    local full_context = ""
-
-    full_context = "Book: " .. title .. ", Author: " .. author .. ". \nFull Context: "
-
-    if prev_context then
-        full_context = full_context .. prev_context .. " "
-    end
-    full_context = full_context .. selected_text
-    if next_context then
-        full_context = full_context .. " " .. next_context
-    end
-    return full_context
-end
 local function showAbout()
     about_text = "" ..
     "Version 0.1\n" ..
@@ -84,6 +62,33 @@ local function showAbout()
     UIManager:show(dialogviewer)
 end
 
+local function get_selection_info(ui)
+    local context_window = Config.config.context_window
+
+    local title, author =
+    ui.document:getProps().title or _("Unknown Title"),
+    ui.document:getProps().authors or _("Unknown Author")
+    
+    selected_text = ui.highlight.selected_text.text
+
+    local prev_context, next_context
+    if ui.highlight then
+        prev_context, next_context = ui.highlight:getSelectedWordContext(context_window)
+    end
+    local full_context = ""
+
+    full_context = "Book: " .. title .. ", Author: " .. author .. ". \nContext: "
+
+    if prev_context then
+        full_context = full_context .. prev_context .. " "
+    end
+    full_context = full_context .. selected_text
+    if next_context then
+        full_context = full_context .. " " .. next_context
+    end
+    return selected_text, full_context
+end
+
 local function showAIMenu_GeneralAsk(ui)
     local title, author =
     ui.document:getProps().title or _("Unknown Title"),
@@ -95,16 +100,16 @@ local function showAIMenu_GeneralAsk(ui)
     Questions.menu(selected_text, context)
 end
 
-local function showAILearningMenu(ui, selected_text)
-    context = get_full_context(ui, selected_text) or _("")
+local function showAILearningMenu(ui)
+    selected_text, context = get_selection_info(ui, selected_text)
 
     Questions.menu(selected_text, context)
 end
 
-local function showAILearningQuestion(ui, selected_text, question_callback)
-    full_context = get_full_context(ui, selected_text) or _("")
+local function showAILearningQuestion(ui, question_callback)
+    selected_text, context = get_selection_info(ui)
 
-    question_callback(selected_text, full_context)
+    question_callback(selected_text, context)
 end
 
 function AILearning:init()
@@ -122,8 +127,7 @@ function AILearning:init()
             enabled = Device:hasClipboard(),
             callback = function()
                 NetworkMgr:runWhenOnline(function()
-                    selected_text = highlight_dialog.selected_text.text
-                    showAILearningMenu(self.ui, selected_text)
+                    showAILearningMenu(self.ui)
                 end)
                 highlight_dialog:onClose(true)
             end,
@@ -135,7 +139,7 @@ function AILearning:init()
             enabled = Device:hasClipboard(),
             callback = function()
                 NetworkMgr:runWhenOnline(function()
-                    showAILearningQuestion(self.ui, highlight_dialog.selected_text.text, Questions.translateText)
+                    showAILearningQuestion(self.ui, Questions.translateText)
                 end)
             end,
         }
@@ -406,7 +410,7 @@ local function getSubMenuConfig()
             keep_menu_open = true,
             callback = function()
                 input_dialog = InputDialog:new {
-                    title = _("Enter your Language.."),
+                    title = _("Enter your Language."),
                     input = _(Config.config.language),
                     input_type = "text",
                     description = _("Enter Language you want AI to speak. "),
@@ -425,6 +429,39 @@ local function getSubMenuConfig()
                                     local input_lang = input_dialog:getInputText()
                                     Config.config.language = input_lang
                                     Prompts.target_language = input_lang
+                                    -- Config.save()
+                                    UIManager:close(input_dialog)
+                                end,
+                            },
+                        },
+                    },
+                }
+                UIManager:show(input_dialog)
+            end,
+        },
+        {
+            text = _("Context Window"),
+            keep_menu_open = true,
+            callback = function()
+                input_dialog = InputDialog:new {
+                    title = _("Enter your context window."),
+                    input = Config.config.context_window,
+                    input_type = "number",
+                    description = _("Enter the desired context window size for the AI. "),
+                    buttons = {
+                        {
+                            {
+                                text = _("Cancel"),
+                                callback = function()
+                                    UIManager:close(input_dialog)
+                                end,
+                            },
+                            {
+                                text = _("Ok"),
+                                is_enter_default = true,
+                                callback = function()
+                                    local context_window = input_dialog:getInputText()
+                                    Config.config.context_window = tonumber(context_window)
                                     -- Config.save()
                                     UIManager:close(input_dialog)
                                 end,
@@ -587,7 +624,7 @@ function AILearning:onDictButtonsReady(dict_popup, buttons)
             font_bold = false,
             callback = function()
                 NetworkMgr:runWhenOnline(function()
-                    showAILearningMenu(self.ui, dict_popup.lookupword)
+                    showAILearningMenu(self.ui)
                 end)
                 dict_popup:onClose()
             end
@@ -597,7 +634,7 @@ function AILearning:onDictButtonsReady(dict_popup, buttons)
             font_bold = false,
             callback = function()
                 NetworkMgr:runWhenOnline(function()
-                    showAILearningQuestion(self.ui, dict_popup.lookupword, Questions.originText)
+                    showAILearningQuestion(self.ui, Questions.originText)
                 end)
             end
         },
@@ -606,7 +643,7 @@ function AILearning:onDictButtonsReady(dict_popup, buttons)
             font_bold = false,
             callback = function()
                 NetworkMgr:runWhenOnline(function()
-                    showAILearningQuestion(self.ui, dict_popup.lookupword, Questions.dictionaryText)
+                    showAILearningQuestion(self.ui, Questions.dictionaryText)
                 end)
             end
         }
