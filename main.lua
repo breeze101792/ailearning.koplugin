@@ -129,7 +129,7 @@ function AILearning:init()
                 NetworkMgr:runWhenOnline(function()
                     showAILearningMenu(self.ui)
                 end)
-                highlight_dialog:onClose(true)
+                highlight_dialog:onClose()
             end,
         }
     end)
