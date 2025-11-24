@@ -63,12 +63,12 @@ function Questions.showInfoDialog(text)
 end
 
 -- Questions
-function Questions.originText(selected_text, context)
-    text = "Word origin"
+function Questions.etymologyText(selected_text, context)
+    text = "Etymology"
     Questions.showInfoDialog()
     UIManager:scheduleIn(0.1, function()
-        question_message = Prompts.originText(selected_text, context )
-        Questions.generateResponse("Provide the word origin to user.", question_message, selected_text, text)
+        question_message = Prompts.etymologyText(selected_text, context )
+        Questions.generateResponse("Provide the word etymology.", question_message, selected_text, text)
     end)
 end
 function Questions.dictionaryText(selected_text, context)
@@ -76,7 +76,7 @@ function Questions.dictionaryText(selected_text, context)
     Questions.showInfoDialog()
     UIManager:scheduleIn(0.1, function()
         question_message = Prompts.dictionaryText(selected_text, context )
-        Questions.generateResponse("Provide the dictionary to user.", question_message, selected_text, text)
+        Questions.generateResponse("Provide the dictionary.", question_message, selected_text, text)
     end)
 end
 function Questions.translateText(selected_text, context)
@@ -84,7 +84,7 @@ function Questions.translateText(selected_text, context)
     Questions.showInfoDialog()
     UIManager:scheduleIn(0.1, function()
         question_message = Prompts.translateText(selected_text, context )
-        Questions.generateResponse("Provide the translation to user.", question_message, selected_text, text)
+        Questions.generateResponse("Provide the translation.", question_message, selected_text, text)
     end)
 end
 function Questions.menu(selected_text, context)
@@ -92,16 +92,14 @@ function Questions.menu(selected_text, context)
     menu_buttons = {
         {
             {
-                text = "Insight",
+                text = "Example",
                 callback = function()
                     Questions.showInfoDialog()
                     UIManager:scheduleIn(0.1, function()
-                        question_message = Prompts.insightText(selected_text, context )
-                        Questions.generateResponse("Provide the insight to user.", question_message, selected_text, text)
+                        question_message = Prompts.exampleText(selected_text, context )
+                        Questions.generateResponse("Provide the example usage.", question_message, selected_text, text)
                     end)
-
-                end,
-                -- hold_callback = function() end
+                end
             },
             {
                 text = "Syntax",
@@ -109,7 +107,7 @@ function Questions.menu(selected_text, context)
                     Questions.showInfoDialog()
                     UIManager:scheduleIn(0.1, function()
                         question_message = Prompts.syntaxText(selected_text, context )
-                        Questions.generateResponse("Provide the syntax to user.", question_message, selected_text, text)
+                        Questions.generateResponse("Provide the syntax.", question_message, selected_text, text)
                     end)
                 end
             },
@@ -119,40 +117,64 @@ function Questions.menu(selected_text, context)
                     Questions.showInfoDialog()
                     UIManager:scheduleIn(0.1, function()
                         question_message = Prompts.translateText(selected_text, context )
-                        Questions.generateResponse("Provide the translation to user.", question_message, selected_text, text)
+                        Questions.generateResponse("Provide the translation.", question_message, selected_text, text)
                     end)
                 end
             },
             {
-                text = "Example",
+                text = "Insight",
                 callback = function()
                     Questions.showInfoDialog()
                     UIManager:scheduleIn(0.1, function()
-                        question_message = Prompts.exampleText(selected_text, context )
-                        Questions.generateResponse("Provide the example usage to user.", question_message, selected_text, text)
+                        question_message = Prompts.insightText(selected_text, context )
+                        Questions.generateResponse("Provide the insight.", question_message, selected_text, text)
                     end)
-                end
+
+                end,
+                -- hold_callback = function() end
             },
         },
         {
+            {
+                text = "Morphology",
+                callback = function()
+                    Questions.showInfoDialog()
+                    UIManager:scheduleIn(0.1, function()
+                        question_message = Prompts.morphologyText(selected_text, context )
+                        Questions.generateResponse("Provide the morphology of this word.", question_message, selected_text, text)
+                    end)
+                end,
+                hold_callback = function() end
+            },
+            {
+                text = "Synonyms",
+                callback = function()
+                    Questions.showInfoDialog()
+                    UIManager:scheduleIn(0.1, function()
+                        question_message = Prompts.synonymsText(selected_text, context )
+                        Questions.generateResponse("Provide the synonyms of this word.", question_message, selected_text, text)
+                    end)
+                end,
+                hold_callback = function() end
+            },
+            {
+                text = "Etymology",
+                callback = function()
+                    Questions.showInfoDialog()
+                    UIManager:scheduleIn(0.1, function()
+                        question_message = Prompts.etymologyText(selected_text, context )
+                        Questions.generateResponse("Provide the etymology of this word.", question_message, selected_text, text)
+                    end)
+                end,
+                hold_callback = function() end
+            },
             {
                 text = "Dictionary",
                 callback = function()
                     Questions.showInfoDialog()
                     UIManager:scheduleIn(0.1, function()
                         question_message = Prompts.dictionaryText(selected_text, context )
-                        Questions.generateResponse("Provide the dictionary content of this word to user.", question_message, selected_text, text)
-                    end)
-                end,
-                hold_callback = function() end
-            },
-            {
-                text = "Word Origin",
-                callback = function()
-                    Questions.showInfoDialog()
-                    UIManager:scheduleIn(0.1, function()
-                        question_message = Prompts.originText(selected_text, context )
-                        Questions.generateResponse("Provide the origin of this word to user.", question_message, selected_text, text)
+                        Questions.generateResponse("Provide the dictionary content of this word.", question_message, selected_text, text)
                     end)
                 end,
                 hold_callback = function() end

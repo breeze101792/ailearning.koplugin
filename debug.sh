@@ -3,6 +3,15 @@ push_android() {
     adb push *.lua utility /storage/emulated/0/koreader/plugins/ailearning.koplugin/
     # adb push utility/*.lua /storage/emulated/0/koreader/plugins/ailearning.koplugin/utility
 }
+push_ankey() {
+    local files_to_copy
+
+    files_to_copy=($@)
+
+    # Execute the scp command
+    adb push "${files_to_copy[@]}" /storage/emulated/0/koreader/data/
+    # adb push utility/*.lua /storage/emulated/0/koreader/plugins/ailearning.koplugin/utility
+}
 
 push() {
     local files_to_copy
@@ -42,16 +51,19 @@ main(){
         echo "  kpush     Push plugin files to Kindle device via scp."
         echo "  kdebug    Display the last 50 lines of the Kindle crash log."
         echo "  kkey <file> Push a key file to Kindle device's data directory."
+        echo "  ankey <file> Push a key file to Android device's data directory."
     elif [ "$1" = "anpush" ]; then
         push_android
     elif [ "$1" = "kpush" ]; then
         push
     elif [ "$1" = "kdebug" ]; then
         debug
+    elif [ "$1" = "ankey" ]; then
+        push_ankey $2
     elif [ "$1" = "kkey" ]; then
         push_key $2
     else
-        echo "Usage: $0 [help|anpush|kpush|kdebug|kkey <file>]"
+        echo "Usage: $0 [help|anpush|kpush|kdebug|ankey|kkey <file>]"
         exit 1
     fi
 }

@@ -630,11 +630,11 @@ function AILearning:onDictButtonsReady(dict_popup, buttons)
             end
         },
         {
-            text = _("Word Origin"),
+            text = _("Etymology"),
             font_bold = false,
             callback = function()
                 NetworkMgr:runWhenOnline(function()
-                    showAILearningQuestion(self.ui, Questions.originText)
+                    showAILearningQuestion(self.ui, Questions.etymologyText)
                 end)
             end
         },
