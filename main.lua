@@ -306,6 +306,76 @@ local function getSubMenuConfig_configServers()
 
     return server_config_menu
 end
+local function getSubMenuConfig_sortingServers()
+    current_idx_cnt = 0
+    server_toogle_menu = {
+        {
+            text = _("# Sorting Servers (Toggle server by orders)"),
+            keep_menu_open = true,
+        },
+        --[[
+        -- need to find a way to update menu.
+        {
+            text = _("Reset server index"),
+            keep_menu_open = true,
+            callback = function(touchmenu_instance)
+                current_idx_cnt = 0
+                for server_name, server_config in pairs(Config.config.servers) do
+                    Config.config.servers[server_name].index = nil
+                end
+            end,
+        },
+        --]]
+    }
+
+    -- Dynamically add user-defined servers from Config.config.servers
+    if Config.config.servers then
+        local sorted_servers = {}
+        for server_name, server_config in pairs(Config.config.servers) do
+            server_config.name = server_name -- Keep track of the original name for logging
+
+            table.insert(sorted_servers, server_config)
+        end
+
+        -- Sort servers by index, handling cases where index might be nil
+        table.sort(sorted_servers, function(a, b)
+            -- return a.index and (not b.index or a.index < b.index)
+            return (a.index or 999) < (b.index or 999)
+        end)
+
+        for idx, server_config in ipairs(sorted_servers) do
+
+            if Config.config.servers[server_config.name].index ~= nil then
+                Config.config.servers[server_config.name].index = current_idx_cnt
+                current_idx_cnt = current_idx_cnt + 1
+            end
+            table.insert(server_toogle_menu, {
+                text = server_config.name .. _(" server"),
+                keep_menu_open = true,
+                checked_func = function()
+                    if Config.config.servers[server_config.name].index == nil then
+                        Config.config.servers[server_config.name].index = nil
+                        return false
+                    else
+                        return true
+                    end
+                end,
+                callback = function(touchmenu_instance)
+                    if Config.config.servers[server_config.name].index == nil then
+                        Config.config.servers[server_config.name].index = current_idx_cnt
+                        current_idx_cnt = current_idx_cnt + 1
+                    else
+                        Config.config.servers[server_config.name].index = nil
+                    end
+
+                    -- Config.save()
+                end,
+            })
+        end
+    end
+
+    return server_toogle_menu
+end
 local function getSubMenuConfig_toggleServers()
     server_toogle_menu = {
         {
@@ -368,6 +438,7 @@ local function getSubMenuConfig_toggleServers()
     return server_toogle_menu
 end
 local function getSubMenuConfig()
+    sorting_server_menu = getSubMenuConfig_sortingServers()
     toggle_server_menu = getSubMenuConfig_toggleServers()
     toggle_config_menu = getSubMenuConfig_configServers()
 
@@ -480,6 +551,10 @@ local function getSubMenuConfig()
         {
             text = _("Toggle Servers"),
             sub_item_table = toggle_server_menu
+        },
+        {
+            text = _("Sorting Servers"),
+            sub_item_table = sorting_server_menu
         },
         {
             text = _("Config Servers"),

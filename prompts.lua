@@ -10,13 +10,15 @@ function Prompts.getSystemInstruction()
     "2. Do not reveal spoilers.\n" ..
     "3. Reply without commentary.\n" ..
     "4. When showing Chinese, do NOT use Pinyin.\n" ..
+    "5. All provided examples are in English. You must reply in the user's language.\n" ..
     ""
     return loc_general_instruction
 end
 function Prompts.getUserInstruction()
     local loc_general_instruction = "Note:\n" ..
-    "1. I am learning a language. Please use my native language, " .. Prompts.target_language .. ", to explain and reply about this (selected) word." ..
+    " Please use " .. Prompts.target_language .. " to reply the question." ..
     ""
+    -- "1. I am learning a language. Please use my native language, " .. Prompts.target_language .. ", to explain and reply about this (selected) word." ..
     -- "3. Translations and explanations must be provided in " .. Prompts.target_language .. "." ..
     return loc_general_instruction
 end
@@ -66,7 +68,22 @@ end
 
 function Prompts.translateText(text, context)
     local question_content = "Analyze the highlighted text."
-    local system_prompt = "You are a helpful language analyst. Provide direct translations and explanations of difficult words, grammar, phrases, and sentence structures clearly and simply."
+    local system_prompt = "You are a helpful language analyst. Provide direct translations and explanations of difficult words, grammar, phrases, and sentence structures clearly and simply.\n" ..
+                          "Example: For the highlighted text 'Si hubiera sabido que venías, te habría preparado una cena.', assume the user's language is English and reply in English.\n" ..
+                          "Translation: If I had known you were coming, I would have prepared dinner for you.\n" ..
+                          "Analysis:\n" ..
+                          "- 'Si': Conjunction, meaning 'if'.\n" ..
+                          "- 'hubiera sabido': Pluperfect subjunctive of 'saber' (to know), meaning 'I had known'.\n" ..
+                          "- 'que venías': Subordinate clause, 'que' (that) + 'venías' (imperfect indicative of 'venir', you were coming).\n" ..
+                          "- 'te': Indirect object pronoun, meaning 'for you'.\n" ..
+                          "- 'habría preparado': Conditional perfect of 'preparar' (to prepare), meaning 'I would have prepared'.\n" ..
+                          "- 'una cena': Noun phrase, meaning 'a dinner'.\n" ..
+                          "Syntax:\n" ..
+                          "- This sentence is a third conditional, expressing a hypothetical past situation and its unreal past result.\n" ..
+                          "- The structure is 'Si + [pluperfect subjunctive], [conditional perfect]'.\n" ..
+                          "Note:\n" ..
+                          "- This structure is often used to express regret.\n" ..
+                          "- The '-se' form of the subjunctive ('hubiese sabido') can also be used with the same meaning."
     return Prompts.generateQuestions(question_content, system_prompt, text, context, true)
 end
 
@@ -95,7 +112,26 @@ end
 
 function Prompts.dictionaryText(text, context)
     local question_content = "Provide a dictionary entry for '" .. text .. "', explained and highlight its meaning in the current context."
-    local system_prompt = "You are a helpful dictionary checker assistant. Provide a comprehensive dictionary entry for this word, without additional commentary. Include base form, IPA, definitions, usages, and examples to help learners master this word. Also include other meanings, phrases, origin, and related parts if applicable."
+    local system_prompt = "You are a helpful dictionary checker assistant. Provide a comprehensive dictionary entry for this word, without additional commentary. Include base form, IPA, definitions, usages, and examples to help learners master this word. Also include other meanings, phrases, origin, and related parts if applicable.\n" ..
+                          "Example: For the selected word 'corrieron', assume the user's language is English and reply in English.\n" ..
+                          "(Optional) Form of: 'corrieron' is the third-person plural preterite indicative of 'correr'.\n" ..
+                          "Word: 'correr' (verb)\n" ..
+                          "IPA: /koˈreɾ/\n" ..
+                          "Definitions: (list all meanings)\n" ..
+                          "1. (Verb) To run, to move at a speed faster than walking.\n" ..
+                          "   Examples:\n" ..
+                          "   1. 'Él corre en el parque todas las mañanas.' (He runs in the park every morning.)\n" ..
+                          "   2. 'Los niños corrieron a casa.' (The children ran home.)\n" ..
+                          "2. (Verb) To flow (for liquids).\n" ..
+                          "   Examples:\n" ..
+                          "   1. 'El agua corre por el río.' (The water flows down the river.)\n" ..
+                          "   2. 'Las lágrimas corrían por sus mejillas.' (Tears were running down her cheeks.)\n" ..
+                          "Phrases:\n" ..
+                          "- 'correr el riesgo': to run the risk.\n" ..
+                          "- 'a todo correr': at full speed.\n" ..
+                          "Origin: From Latin 'currere'.\n" ..
+                          "Related parts: corredor (noun, runner), carrera (noun, race/career), corriendo (gerund)\n" ..
+                          "Note: The verb 'correr' is highly versatile and can also mean 'to flow' (for liquids) or 'to slide' depending on the context."
     return Prompts.generateQuestions(question_content, system_prompt, text, context, false)
 end
 

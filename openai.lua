@@ -122,7 +122,19 @@ function OpenAI.query(message_history)
 
     -- Loop through dynamically added servers
     if Config.config.servers then
+        local sorted_servers = {}
         for server_name, server_config in pairs(Config.config.servers) do
+            server_config.name = server_name -- Keep track of the original name for logging
+            table.insert(sorted_servers, server_config)
+        end
+
+        -- Sort servers by index, handling cases where index might be nil
+        table.sort(sorted_servers, function(a, b)
+            -- return a.index and (not b.index or a.index < b.index)
+            return (a.index or 999) < (b.index or 999)
+        end)
+
+        for _, server_config in ipairs(sorted_servers) do
             if server_config.enable then
                 local server_info = {
                     server_url = server_config.server_url,
@@ -134,7 +146,7 @@ function OpenAI.query(message_history)
                     return resp
                 end
             else
-                Logger.debug(string.format('Dynamic server "%s" disabled.', server_name))
+                Logger.debug(string.format('Dynamic server "%s" disabled.', server_config.name))
             end
         end
     end

@@ -74,11 +74,10 @@ Here's an example of the `ailearning.json` structure:
       "enable":false,
       "api_key":"your_api_key_here",
       "server_url":"https://api.example.com/v1",
-      "model":"example_model"
+      "model":"example_model",
+      "index": 0
     }
   },
   "log_level": 3
 }
-
-
 

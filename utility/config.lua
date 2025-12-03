@@ -45,6 +45,7 @@ Config.config = {
         -- Each server should have 'enable', 'api_key', 'model', and 'server_url' fields.
         --[[
         example = {
+            index = 0
             enable = false, -- Set to true to enable this backup server
             api_key = "",
             model = "",
