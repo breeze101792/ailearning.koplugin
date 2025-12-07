@@ -90,13 +90,12 @@ local function get_selection_info(ui)
     return selected_text, full_context
 end
 
-local function showAIMenu_GeneralAsk(ui)
-    local title, author =
-    ui.document:getProps().title or _("Unknown Title"),
-    ui.document:getProps().authors or _("Unknown Author")
+local function showAIMenu_DebugAsk()
+    local title = "Unknown Title"
+    local author = "Unknown Author"
 
-    context = "Book: " .. title .. ", Author: " .. author
-    selected_text = ""
+    context = "Book: " .. title .. ", Author: " .. author .. ". \nContext: No context."
+    selected_text = "Hi, it's just a test."
 
     Questions.menu(selected_text, context)
 end
@@ -615,7 +614,7 @@ local function getSubMenuDebug()
             text = _("Show AI Menu"),
             keep_menu_open = true,
             callback = function()
-                showAIMenu_GeneralAsk(self.ui)
+                showAIMenu_DebugAsk()
             end,
             separator = true,
         },
@@ -623,7 +622,7 @@ local function getSubMenuDebug()
             text = _("# Tasting zone(Don't try it at home.)"),
             keep_menu_open = true,
             callback = function()
-                showAIMenu_GeneralAsk(self.ui)
+                showAIMenu_DebugAsk()
             end,
         },
         {
