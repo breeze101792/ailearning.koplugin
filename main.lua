@@ -22,6 +22,7 @@ local DialogViewer = require("dialogviewer")
 -- local Dialog = require("dialogs")
 -- local QuestionMenu = require("questionmenu")
 local Questions = require("questions")
+local Pronounce = require("pronounce")
 local Prompts = require("prompts")
 
 local AILearning = WidgetContainer:extend{
@@ -616,6 +617,21 @@ local function getSubMenuDebug()
             callback = function()
                 showAIMenu_GeneralAsk(self.ui)
             end,
+            separator = true,
+        },
+        {
+            text = _("# Tasting zone(Don't try it at home.)"),
+            keep_menu_open = true,
+            callback = function()
+                showAIMenu_GeneralAsk(self.ui)
+            end,
+        },
+        {
+            text = _("Pronounce"),
+            font_bold = false,
+            callback = function()
+                Pronounce.pronounceText('Test', "")
+            end
         },
     }
 
