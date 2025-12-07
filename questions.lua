@@ -71,6 +71,14 @@ function Questions.etymologyText(selected_text, context)
         Questions.generateResponse("Provide the word etymology.", question_message, selected_text, text)
     end)
 end
+function Questions.insightText(selected_text, context)
+    text = "Insight"
+    Questions.showInfoDialog()
+    UIManager:scheduleIn(0.1, function()
+        question_message = Prompts.insightText(selected_text, context )
+        Questions.generateResponse("Provide insight of the word.", question_message, selected_text, text)
+    end)
+end
 function Questions.dictionaryText(selected_text, context)
     text = "Dictionary"
     Questions.showInfoDialog()
