@@ -619,7 +619,7 @@ local function getSubMenuDebug()
             separator = true,
         },
         {
-            text = _("# Tasting zone(Don't try it at home.)"),
+            text = _("# Tasting zone (Don't try it at home.)"),
             keep_menu_open = true,
             callback = function()
                 showAIMenu_DebugAsk()

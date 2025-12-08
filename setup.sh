@@ -3,6 +3,8 @@ export VAR_KOREADER_ROOT_PATH=''
 
 export VAR_PROTOCAL='ssh'
 
+export VAR_TARGET_SYSTEM="android"
+
 # precheck
 if test -n "${AL_HOST}"; then
     export VAR_TARGET_HOST="${AL_HOST}"
@@ -56,12 +58,22 @@ execute() {
     fi
 }
 
-setup_info() {
-    if [ ${VAR_PROTOCAL} = "ssh" ]; then
-        VAR_KOREADER_ROOT_PATH="/storage/emulated/0/koreader"
-    elif [ ${VAR_PROTOCAL} = "adb" ]; then
+setup_env() {
+    if [ ${VAR_TARGET_SYSTEM} = "kindle" ]; then
         VAR_KOREADER_ROOT_PATH="/mnt/us/koreader"
+    elif [ ${VAR_TARGET_SYSTEM} = "android" ]; then
+        VAR_KOREADER_ROOT_PATH="/storage/emulated/0/koreader"
     fi
+}
+show_setup() {
+    echo "#######################################################################"
+    echo "##  Current configuration:"
+    echo "##    Target Host: ${VAR_TARGET_HOST}"
+    echo "##    Protocol: ${VAR_PROTOCAL}"
+    echo "##    Target System: ${VAR_TARGET_SYSTEM}"
+    echo "##    Koreader Root Path: ${VAR_KOREADER_ROOT_PATH}"
+    echo "#######################################################################"
+    echo ""
 }
 
 fupgrade() {
@@ -125,6 +137,7 @@ fhelp(){
     echo ""
     echo "Options:"
     echo "  -p, --protocal <ssh|adb>  Specify the protocal to use (ssh or adb)."
+    echo "  -s, --system <kindle|android> Specify the target system (kindle or android)."
     echo "  -t, --target <hostname>     Specify the target host for ssh/adb."
     echo "                            Alternatively, set the AL_HOST environment variable."
     echo "  -h, --help                Display this help message."
@@ -154,6 +167,10 @@ main(){
                 fi
                 shift 1
                 ;;
+            -s|--system)
+                VAR_TARGET_SYSTEM=${2}
+                shift 1
+                ;;
             -t|--target)
                 VAR_TARGET_HOST=${2}
                 shift 1
@@ -176,8 +193,8 @@ main(){
         return 1
     fi
     # sync info.
-    setup_info
-
+    setup_env
+    show_setup
 
     if [ "${var_action}" = "upgrade" ]; then
         fupgrade
